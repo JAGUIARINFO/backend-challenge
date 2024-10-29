@@ -1,120 +1,120 @@
-# Tech Challenge
+# Backend Challenge
 
-O desafio consiste na integração com a API de um SaaS utilizado por nossos clientes. Precisamos extrair seus dados através de endpoints REST descritos neste repositório e exibi-los de forma consolidada.
+Este é um projeto Ruby para integração com uma API mock, projetado para coletar, processar e exibir dados de usuários de um SaaS fictício. A aplicação foi estruturada em três componentes principais para facilitar a manutenção, modularização e escalabilidade.
 
-## Nós precisamos que você implemente
+## Índice
+1. [Pré-requisitos](#pré-requisitos)
+2. [Instalação](#instalação)
+3. [Configuração](#configuração)
+4. [Execução](#execução)
+5. [Estrutura do Projeto](#estrutura-do-projeto)
+6. [Testes](#testes)
+7. [Decisões Técnicas](#decisões-técnicas)
 
-1. Uma aplicação simples (console, API, worker, o que se sentir mais confortável) que será responsável pela integração com a API do nosso SaaS Mock para coletar os dados dos usuários cadastrados, convertê-los seguindo as regras abaixo e exibir o resultado final.
+---
 
-2. Um usuário deve conter ao menos as seguintes informações:
+1. ## Pré-requisitos
 
-- ID
-- Nome
-- Email (ofuscado conforme regra abaixo)
-- Data de última atividade (em formato ISO-8601)
-- Flag para indicar se o usuário é pagante ou não
-- Flag para determinar se o usuário está ativo ou não
+- **Ruby 2.4.5**: Certifique-se de ter essa versão do Ruby instalada para compatibilidade com o projeto.
+- **Bundler**: Para gerenciar as dependências do projeto.
+- **Docker**: Para executar a API mock em um contêiner.
 
-3. A API que estamos integrando retorna a propriedade `status` com os possíveis valores: `enabled`, `disabled`. O usuário apenas não está ativo quando o valor é igual a `disabled`.
+2. ## Instalação
 
-4. Também temos a necessidade de mapear se o usuário é pagante ou não. A API que estamos integrando não possui informação direta para definir este campo, mas sabemos que ela retorna um campo `role` e através deste conseguimos determinar o que precisamos. Devemos considerar a seguinte regra para este campo:
+**Clone o Repositório**
 
-| Role   | Pagante |
-|--------|---------|
-| viewer | `false` |
-| system | `false` |
-| editor | `true`  |
-| admin  | `true`  |
+   ```
+   git clone <url-do-repositorio>
+   cd backend-challenge
+   ```
 
-5. Usuários inativos nunca são pagantes. A verificação se o usuário está inativo (`status` igual a `disabled`) deve ser feita antes de qualquer outra lógica, incluindo a verificação do campo role. Portanto, mesmo que o role indique que um usuário poderia ser pagante, se ele estiver inativo, ele deve ser considerado não pagante.
+**Instale as Dependências**
 
-6. A data de última atividade devolvida na API está no formato Unix Epoch e deve ser convertida para o padrão ISO-8601, considerando o fuso horário UTC.
+Certifique-se de que o bundler está instalado. Em seguida, instale as dependências do projeto:
 
-7. O email deve ser ofuscado sempre que o domínio for diferente de `niuco.com.br`, de modo que só seja possível visualizar os primeiros e últimos 2 caracteres do alias e o domínio.
-
-### Exemplos de Ofuscação de Email:
-
-- **Email com domínio `niuco.com.br`:**
-  - Original: joao.silva@niuco.com.br
-  - Ofuscado: joao.silva@niuco.com.br
-
-- **Email com domínio diferente de `niuco.com.br`:**
-  - Original: maria.oliveira@gmail.com
-  - Ofuscado: ma********a@gmail.com
-
-  - Original: pedro.santos@yahoo.com
-  - Ofuscado: pe*******os@yahoo.com
-
-  - Original: claudia.rodrigues@outlook.com
-  - Ofuscado: cl********es@outlook.com
-
-  - Original: luiz.almeida@empresa.com
-  - Ofuscado: lu*****da@empresa.com
-
-### Detalhamento Adicional
-
-- Utilize variáveis de ambiente para configuração da URL da API mock.
-- Inclua tratamento de erros e logging apropriado.
-- Implemente testes unitários e de integração para validar sua solução.
-- Adicione documentação detalhada da aplicação, incluindo um README com instruções de instalação, execução, uso e decisões técnicas.
-- Demonstre como a aplicação pode ser escalada e mantida.
-- Configure um pipeline de CI/CD básico para rodar testes automaticamente.
-
-## Extra
-
-- Você pode utilizar qualquer framework e biblioteca.
-- É um diferencial trabalhar com Typescript no dia a dia.
-
-## Instalação
-
-### Docker
-
-Caso possua Docker em sua máquina, utilize o seguinte comando para rodar nossa API de mock:
-
-```bash
-docker-compose up
+```
+gem install bundler
+bundle install
 ```
 
-### Pacote NPM
+3. ## Configuração
 
-Se preferir, também é possível rodar a API de mock diretamente pela sua máquina:
+**Configuração do Docker**
 
-```bash
-npm install -g json-server
-cd config
-json-server --watch db.json
+Para rodar a API mock, execute o comando a partir da raiz do projeto:
+
+```
+docker-compose up -d
 ```
 
-## Mock API
+Isso irá iniciar o json-server na porta 8080, conforme configurado no arquivo docker-compose.yml.
 
-Com o serviço executando, você poderá utilizar as seguintes APIs:
+**Configuração do Arquivo .env**
 
-### Users
+Crie um arquivo .env na raiz do projeto com o conteúdo abaixo, para definir a URL da API mock:
 
-Listagem de `users` registrados:
-
-`GET http://0.0.0.0:8080/users`
-
-### Exemplos de Payload
-
-#### Request
-
-```json
-GET http://0.0.0.0:8080/users
+```
+API_URL=http://0.0.0.0:8080
 ```
 
-#### Response
+Este arquivo configura o endpoint da API para o UserFetcher.
 
-```json
-[
-  {
-    "id": "1",
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "last_activity": 1622499200,
-    "role": "admin",
-    "status": "enabled"
-  },
-  ...
-]
+4. ## Execução
+
+Após instalar as dependências e configurar a aplicação, execute o main.rb para iniciar a coleta e exibição dos dados:
+
 ```
+ruby main.rb
+```
+
+Este comando executará o processo completo:
+
+- Buscar dados da API mock.
+- Processar os dados aplicando regras de transformação.
+- Exibir o resultado final no console.
+
+5. ## Estrutura do Projeto
+
+A estrutura do projeto foi separada em módulos para maior organização e escalabilidade:
+
+* lib
+    * user_fetcher.rb *(Classe responsável pela busca dos dados de usuários da API mock)*
+    * user_processor.rb *(Classe que aplica regras de transformação e processamento dos dados)*
+    * user_presenter.rb *(Classe que exibe os dados no console)*
+* main.rb *(Arquivo principal que integra as três classes acima)*
+* data
+    * db.json *(Dados mock para a API, usado pelo json-server)*
+* .env *(Arquivo de configuração para variáveis de ambiente)*
+* spec *(Testes unitários e de integração)*
+    * user_fetcher_spec.rb *(Teste para UserFetcher)*
+    * user_processor_spec.rb *(Teste para UserProcessor)*
+    * user_presenter_spec.rb *(Teste para UserPresenter)*
+    * integration_spec.rb *(Teste de integração)*
+* docker-compose.yml *(Configurações para rodar o serviço json-server na imagem vimagick)*
+* .github
+    * workflows
+        * ruby.yml *(Pipeline de CI/CD básico para rodar testes automaticamente)*
+
+6. ## Testes
+
+Os testes foram desenvolvidos com RSpec, cobrindo unidades e integração.
+
+**Execução dos Testes**
+
+Para rodar todos os testes:
+
+```
+rspec
+```
+
+7. ## Decisões Técnicas
+
+Organização Modular: A aplicação foi dividida em três módulos (UserFetcher, UserProcessor, UserPresenter) para seguir o princípio de responsabilidade única. Isso facilita a manutenção e expansão do código.
+
+Uso de .env: O arquivo .env foi utilizado para configurar o endpoint da API. Isso facilita a alteração do ambiente de desenvolvimento sem necessidade de modificar o código.
+
+Gem httparty: Escolhida para consumir a API mock devido à sua simplicidade e integração com APIs REST.
+
+Teste e Cobertura: Utilizamos RSpec para testes de unidade e integração, além do SimpleCov para garantir a cobertura de código. A estrutura de testes permite verificar a integridade de cada componente e o fluxo completo da aplicação.
+
+Uso do Docker e json-server: O Docker foi escolhido para simplificar a execução da API mock.
