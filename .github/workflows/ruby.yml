@@ -5,16 +5,23 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-20.04
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.4.5
+
+      - name: Install specific version of Bundler
+        run: |
+          gem install bundler -v 2.3.26
+
       - name: Install dependencies
         run: |
-          gem install bundler
-          bundle install
+          bundle _2.3.26_ install
+
       - name: Run tests
         run: |
-          bundle exec rspec
+          bundle _2.3.26_ exec rspec
